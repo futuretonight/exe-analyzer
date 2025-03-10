@@ -1,16 +1,8 @@
-import os
-import requests
-import zipfile
-import shutil
-import subprocess
-import sys
-
-# GitHub repo details
-UPDATE_URL = "https://github.com/YOUR_REPO/releases/latest"
-DOWNLOAD_URL = "https://github.com/YOUR_REPO/releases/latest/download/malware_tool.zip"
-
 # Required dependencies
 REQUIRED_LIBRARIES = ["frida", "psutil", "scapy", "keyboard", "requests"]
+
+import subprocess
+import sys
 
 def install_dependencies():
     """Checks and installs missing dependencies."""
@@ -22,8 +14,13 @@ def install_dependencies():
             subprocess.run([sys.executable, "-m", "pip", "install", lib], check=True)
     print("✅ All dependencies installed!")
 
+# GitHub repo details
+UPDATE_URL = "https://github.com/YOUR_REPO/releases/latest"
+# DOWNLOAD_URL = "https://github.com/YOUR_REPO/releases/latest/download/malware_tool.zip"
+
 def check_for_updates():
     """Checks GitHub for the latest version."""
+    import requests  # Import here to ensure it's available after installation
     try:
         response = requests.get(UPDATE_URL)
         latest_version = response.text.split('tag/')[1].split('"')[0]  # Extract latest version
@@ -34,6 +31,9 @@ def check_for_updates():
 
 def download_update():
     """Downloads and extracts the latest update."""
+    import requests  # Import here to ensure it's available after installation
+    import zipfile
+    import shutil
     try:
         print("⬇️ Downloading update...")
         response = requests.get(DOWNLOAD_URL, stream=True)
@@ -53,7 +53,7 @@ def download_update():
 
 if __name__ == "__main__":
     print("🔄 Checking for updates & dependencies...")
-    install_dependencies()
+    install_dependencies()  # Ensure dependencies are installed before any other imports
     latest_version = check_for_updates()
     
     if latest_version:
