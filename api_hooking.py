@@ -14,11 +14,22 @@ Interceptor.attach(Module.findExportByName(null, 'InternetOpenA'), {
 """
 
 def hook_process(target_process):
-    session = frida.attach(target_process)
-    script = session.create_script(JS_CODE)
+    try:
+        session = frida.attach(target_process)
+    except Exception as e:
+        print(f"Error attaching to process {target_process}: {e}")
+        return
+
+    try:
+        script = session.create_script(JS_CODE)
+    except Exception as e:
+        print(f"Error creating script: {e}")
+        return
+
     script.on("message", lambda message, data: print("[API CALL]", message["payload"]))
     script.load()
-    print(f"Monitoring {target_process}...")
+    print(f"Successfully monitoring {target_process}...")
+
     input()
 
 if __name__ == "__main__":
