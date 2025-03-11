@@ -37,12 +37,14 @@ def check_admin():
     except Exception:
         return False
 
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
 def setup_config():
     """Create or load configuration file"""
     default_config = {
         "version": VERSION,
         "last_update_check": time.time(),
-        "api_key": "",
+        "api_key": "",  # ✅ Store API key locally
         "scan_depth": "normal",
         "auto_update": True,
         "first_run": True
@@ -68,6 +70,7 @@ def save_config(config):
             json.dump(config, f, indent=4)
     except Exception:
         pass
+
 
 def get_installed_packages():
     """Retrieve installed pip packages"""
@@ -109,8 +112,9 @@ def install_dependencies_and_gui():
         ))
 
     def install_thread():
-        installed = get_installed_packages()
+        installed = get_installed_packages()  # Use helper function to get installed packages
         total = len(REQUIRED_LIBRARIES)
+
         for idx, (lib, required_version) in enumerate(REQUIRED_LIBRARIES.items(), 1):
             if lib.lower() == "tk":
                 try:
@@ -131,8 +135,8 @@ def install_dependencies_and_gui():
             try:
                 subprocess.run([sys.executable, "-m", "pip", "install", lib], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 update_ui(f"✅ Successfully installed {lib}", idx, total)
-            except subprocess.SubprocessError:
-                update_ui(f"❌ Failed to install {lib}", idx, total)
+            except subprocess.SubprocessError as e:
+                update_ui(f"❌ Failed to install {lib}: {str(e)}", idx, total)
 
         update_ui("All dependencies checked. Launching main application...", total, total)
         time.sleep(2)

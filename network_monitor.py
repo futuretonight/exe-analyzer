@@ -1,3 +1,4 @@
+import platform
 import tkinter as tk
 import time
 import threading
@@ -41,8 +42,14 @@ def monitor_network(result_text):
         # Set up packet sniffer with a timeout to allow for clean stopping
         while True:
             try:
-                scapy.sniff(prn=lambda packet: packet_callback(packet, result_text), 
-                           store=False, timeout=2)
+                if platform.system() == "Windows":
+                     from scapy.arch.windows import WinPcapPipe  # Use WinPcap if available
+                     sniff_iface = WinPcapPipe()
+                else:
+                     sniff_iface = scapy.conf.L3socket()  # Use L3socket for Linux/macOS
+
+                scapy.sniff(prn=lambda packet: packet_callback(packet, result_text), store=False, iface=sniff_iface)
+
             except Exception as e:
                 # Just log errors and continue
                 result_text.insert(tk.END, f"[NETWORK] Sniffing error: {str(e)}\n")
